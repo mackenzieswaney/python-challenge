@@ -1,59 +1,72 @@
-import csv
+# Import
 import os
+import csv
 
-# CSV path
-budget_data_csv = os.path.join("/Users/mackenzieswaney/pybank/", 'budget_data.csv')
+election_data_csv = os.path.join("/Users/mackenzieswaney/pypoll/", "election_data.csv")
 
-# Total months output/ tracking
-total_months = 0
+# Create dicionary
+election = {}
 
-# Create lists
-months = []
-net = []
-changes = []
+# Count votes
+votes_count = 0
 
-# Read CSV
-with open(budget_data_csv, newline='') as csvfile:
-    bankreader = csv.reader(csvfile, delimiter=",")
+# Read CSV file & Initialize Variables
+with open(election_data_csv, newline='') as csvfile:
+    pollreader = csv.reader(csvfile, delimiter=',')
 
     # Read header row
     csv_header = next(csvfile)
 
-# Loop through CSV - count months & total rev
-    for row in bankreader:
-        total_months = total_months + 1
-        net.append(int(row[1]))
-        prev = total_months - 1
-        change = int(row[1]) - net[(prev-1)]
-        changes.append(change)
-        months.append(str(row[0]))
-       
-# Define variables
-total = sum(net)
-average_change = round(sum(changes)/(len(changes)-1), 2)
-max_val = max(changes)
-min_val = min(changes)
-max_ind = changes.index(max_val)
-min_ind = changes.index(min_val)
-max_month = months[max_ind]
-min_month = months[min_ind]
+# Loop through CSV - count votes per candidate & total votes
+    for row in pollreader:
+        votes_count = votes_count + 1
+        if row[2] in election.keys():
+            election[row[2]] = election[row[2]] + 1
+        else:
+            election[row[2]] = 1
+
+# Candidate & vote list
+candidate = []
+num_votes = []
+
+# Append dictionary to list of candidate name & vote count
+for key, value in election.items():
+    candidate.append(key)
+    num_votes.append(value)
+
+# Percent won/ list
+percent = []
+for i in num_votes:
+    percent.append(round((i)/(votes_count)*100, 1))
+
+# Clean data
+results = list(zip(candidate, num_votes, percent))
+
+# Winner List
+winner_list = []
+
+for item in results:
+    if max(num_votes) == item[1]:
+        winner_list.append(item[0])
+
+# Winner list to winner name
+winner = winner_list[0]
 
 # Print to terminal
-print("Financial Analysis")
-print("-------------------------")
-print(f'Total Months: {total_months}')
-print(f'Total: ${total}')
-print(f'Average Change: #{average_change}')
-print(f'Greatest Increase in Profits: {max_month} (${max_val})')
-print(f'Greatest Decrease in Profits: {min_month} (${min_val})')
+print(f'\nElection Results \n------------------------- \nTotal Votes: ' +str(votes_count) + '\n-------------------------')
+for item in results:
+    print(item[0] + f': ' + str(item[2]) +'% (' + str(item[1]) + ')')
+print(f'------------------------- \nWinner: '+ winner +'\n-------------------------')
 
-# Print to txt file
-textfile = open("pybankmackenzie.txt", "w")
+# Print txtfile
+textfile = open("pypollmackenzie.txt", "w")
 
-textfile.write("Financial Analysis\n")
-textfile.write("-------------------------\n")
-textfile.write(f'Total Months: {total_months}\n')
-textfile.write(f'Total: ${total}\n')
-textfile.write(f'Average Change: ${average_change}\n')
-textfile.write(f'Greatest Increase in Profits: {max_month} (${max_val})\n')
-textfile.write(f'Greatest Decrease in Profits: {min_month} (${min_val})')
+textfile.write("Election Results\n")
+textfile.write(f'-------------------------\n')
+textfile.write(f'Total Votes: ' +str(votes_count) + '\n')
+textfile.write(f'-------------------------\n')
+for item in results:
+    textfile.write(item[0] + f': ' + str(item[2]) +'% (' + str(item[1]) + ')\n')
+textfile.write(f'-------------------------\n')
+textfile.write(f'Winner: ' + winner + '\n')
+textfile.write(f'-------------------------') 
